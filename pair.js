@@ -20,10 +20,10 @@ function removeFile(FilePath) {
 
 router.get('/', async (req, res) => {
     let num = req.query.number;
-    async function PrabathPair() {
+    async function ImmanuelxPair() {
         const { state, saveCreds } = await useMultiFileAuthState(`./session`);
         try {
-            let PrabathPairWeb = makeWASocket({
+            let ImmanuelPairWeb = makeWASocket({
                 auth: {
                     creds: state.creds,
                     keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" }).child({ level: "fatal" })),
@@ -33,25 +33,25 @@ router.get('/', async (req, res) => {
                 browser: Browsers.macOS("Safari"),
             });
 
-            if (!PrabathPairWeb.authState.creds.registered) {
+            if (!ImmanuelxPairWeb.authState.creds.registered) {
                 await delay(1500);
                 num = num.replace(/[^0-9]/g, '');
-                const code = await PrabathPairWeb.requestPairingCode(num);
+                const code = await ImmanuelPairWeb.requestPairingCode(num);
                 if (!res.headersSent) {
                     await res.send({ code });
                 }
             }
 
-            PrabathPairWeb.ev.on('creds.update', saveCreds);
-            PrabathPairWeb.ev.on("connection.update", async (s) => {
+            ImmanuelxPairWeb.ev.on('creds.update', saveCreds);
+            ImmanuelxPairWeb.ev.on("connection.update", async (s) => {
                 const { connection, lastDisconnect } = s;
                 if (connection === "open") {
                     try {
                         await delay(10000);
-                        const sessionPrabath = fs.readFileSync('./session/creds.json');
+                        const sessionImmanuelx = fs.readFileSync('./session/creds.json');
 
                         const auth_path = './session/';
-                        const user_jid = jidNormalizedUser(PrabathPairWeb.user.id);
+                        const user_jid = jidNormalizedUser(ImmanuelPairWeb.user.id);
 
                       function randomMegaId(length = 6, numberLength = 4) {
                       const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -69,12 +69,12 @@ router.get('/', async (req, res) => {
 
                         const sid = string_session;
 
-                        const dt = await PrabathPairWeb.sendMessage(user_jid, {
+                        const dt = await ImmanuelxPairWeb.sendMessage(user_jid, {
                             text: sid
                         });
 
                     } catch (e) {
-                        exec('pm2 restart prabath');
+                        exec('pm2 restart immanuelx');
                     }
 
                     await delay(100);
@@ -82,25 +82,25 @@ router.get('/', async (req, res) => {
                     process.exit(0);
                 } else if (connection === "close" && lastDisconnect && lastDisconnect.error && lastDisconnect.error.output.statusCode !== 401) {
                     await delay(10000);
-                    PrabathPair();
+                    ImmanuelxPair();
                 }
             });
         } catch (err) {
-            exec('pm2 restart prabath-md');
+            exec('pm2 restart immanuelx-md');
             console.log("service restarted");
-            PrabathPair();
+            ImmanuelxPair();
             await removeFile('./session');
             if (!res.headersSent) {
                 await res.send({ code: "Service Unavailable" });
             }
         }
     }
-    return await PrabathPair();
+    return await ImmanuelxPair();
 });
 
 process.on('uncaughtException', function (err) {
     console.log('Caught exception: ' + err);
-    exec('pm2 restart prabath');
+    exec('pm2 restart immanuelx');
 });
 
 
